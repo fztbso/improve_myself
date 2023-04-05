@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todo_app_tutorial/constants/colors.dart';
+import 'package:todo_app_tutorial/data/database.dart';
 import 'package:todo_app_tutorial/widgets/todo_item.dart';
 
 import '../model/todo.dart';
@@ -14,22 +16,31 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final todosList = ToDo.todoList();
+
+  final _myBox = Hive.box("mybox");
+  ToDoDataBase db = ToDoDataBase();
+
+  //final todosList = ToDo.todoList();
   List<ToDo> _foundToDo = [];
   final _todoController = TextEditingController();
 
   @override
-  void initState() {
-    _foundToDo = todosList;
+ void initState() {
+    if(_myBox.get("bbb") == null){
+      db.createInitialData();
+    } else {
+      db.loadData();
+    }
     super.initState();
   }
+
 
   void _runFilter(String enteredKeyword) {
     List<ToDo> results = [];
     if (enteredKeyword.isEmpty) {
-      results = todosList;
+      results = db.todosList;
     } else {
-      results = todosList
+      results = db.todosList
           .where((item) => item.todoText!
               .toLowerCase()
               .contains(enteredKeyword.toLowerCase()))
@@ -44,17 +55,19 @@ class _HomeState extends State<Home> {
     setState(() {
       todo.isDone = !todo.isDone;
     });
+    db.updateDatabase();
   }
 
   void _deleteToDoChange(String id) {
     setState(() {
-      todosList.removeWhere((item) => item.id == id);
+      db.todosList.removeWhere((item) => item.id == id);
     });
+    db.updateDatabase();
   }
 
   void _addToDoItem(String toDo) {
     setState(() {
-      todosList.add(ToDo(
+      db.todosList.add(ToDo(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           todoText: toDo));
     });
@@ -69,7 +82,7 @@ class _HomeState extends State<Home> {
       body: Stack(
         children: [
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
             child: Column(
               children: [
                 searchBox(),
@@ -77,8 +90,8 @@ class _HomeState extends State<Home> {
                   child: ListView(
                     children: [
                       Container(
-                        margin: EdgeInsets.only(top: 50, bottom: 20),
-                        child: Text(
+                        margin: const EdgeInsets.only(top: 50, bottom: 20),
+                        child: const Text(
                           "All ToDos",
                           style: TextStyle(
                               fontSize: 30, fontWeight: FontWeight.w500),
@@ -102,9 +115,9 @@ class _HomeState extends State<Home> {
               children: [
                 Expanded(
                   child: Container(
-                    margin: EdgeInsets.only(right: 20, left: 20, bottom: 20),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    decoration: const BoxDecoration(
+                    margin: const EdgeInsets.only(right: 20, left: 20, bottom: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                    decoration: BoxDecoration(
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
@@ -113,13 +126,11 @@ class _HomeState extends State<Home> {
                             blurRadius: 10.0,
                             spreadRadius: 0.0)
                       ],
-                      /////////////////////////////////////////////////////////////////////////
-                      // HÜSEYİNE SOR !!!!!
-                      // borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: TextField(
                       controller: _todoController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: "Add a new item",
                         border: InputBorder.none,
                       ),

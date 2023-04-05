@@ -9,7 +9,7 @@ class ToDo {
     this.isDone = false,
 });
 
-  static List<ToDo> todoList() {
+  /* static List<ToDo> todoList() {
     return [
       ToDo(id: "01", todoText: "Morning Exercis", isDone: true),
       ToDo(id: "02", todoText: "Buy Grocerias", isDone: true),
@@ -19,4 +19,5 @@ class ToDo {
       ToDo(id: "06", todoText: "Dinner with Hüseyin"),
     ];
   }
+   */
 }
